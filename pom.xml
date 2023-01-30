@@ -10,6 +10,14 @@
 	<name>SmartHome POM</name>
 	<description>Parent for SmartHome Projects</description>
 
+	<distributionManagement>
+  	   <repository>
+   	      <id>github</id>
+  	      <name>GitHub Packages</name>
+  	      <url>https://maven.pkg.github.com/rockyhopper/smarthome</url>
+	   </repository>
+	</distributionManagement>
+
 	<modules>
 	  <module>wes</module>	
 	</modules>
