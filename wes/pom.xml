@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.rockhopper.smarthome</groupId>
+		<artifactId>smarthome</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	
+	<groupId>org.rockhopper.smarthome.wes</groupId>
+	<artifactId>wes</artifactId>
+	<packaging>pom</packaging>
+	<name>WES POM</name>
+	<description>Parent for WES Projects</description>
+
+	<properties>
+		<java.version>1.8</java.version>
+    		<maven.compiler.source>8</maven.compiler.source>
+	        <maven.compiler.target>8</maven.compiler.target>		
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		
+		<spring-boot.version>2.7.0</spring-boot.version>
+	</properties>
+
+	<dependencyManagement>
+	     <dependencies>
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-dependencies</artifactId>
+   		    <version>${spring-boot.version}</version>
+		    <type>pom</type>
+		    <scope>import</scope>
+		</dependency>
+	    </dependencies>
+	</dependencyManagement>
+
+	<build>
+	   <plugins>
+	      <plugin>
+	         <groupId>org.springframework.boot</groupId>
+		 <artifactId>spring-boot-maven-plugin</artifactId>
+		 <version>${spring-boot.version}</version>
+	      </plugin>
+	   </plugins>
+	</build>
+
+	<modules>
+	  <module>org.rockhopper.smarthome.wes.mqttWES</module>	
+	</modules>
+</project>
