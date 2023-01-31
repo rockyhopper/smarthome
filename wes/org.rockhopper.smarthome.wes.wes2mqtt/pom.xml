@@ -8,7 +8,7 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	
-	<artifactId>org.rockhopper.smarthome.wes.mqttWES</artifactId>
+	<artifactId>org.rockhopper.smarthome.wes.wes2mqtt</artifactId>
 	<packaging>jar</packaging>
 	<name>MQTT WES</name>
 	<description>MQTT Gateway for WES</description>

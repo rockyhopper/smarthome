@@ -47,6 +47,6 @@
 	</build>
 
 	<modules>
-	  <module>org.rockhopper.smarthome.wes.mqttWES</module>	
+	  <module>org.rockhopper.smarthome.wes.wes2mqtt</module>	
 	</modules>
 </project>
