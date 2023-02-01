@@ -21,6 +21,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Publish to GitHub Packages
-        run: mvn --batch-mode deploy
+        run: mvn --batch-mode -U -Prelease deploy
         env:
           GITHUB_TOKEN: ${{ secrets.SVC_ACCOUNT }}
