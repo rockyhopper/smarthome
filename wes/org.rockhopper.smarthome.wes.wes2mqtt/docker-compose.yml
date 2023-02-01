@@ -1,12 +1,16 @@
 version: "3.9"
 services:
-  helloworld:
-    container_name: gs-spring-boot-docker
+  wes2mqtt:
+    container_name: wes2mqtt
     build:
       context: ./.
       dockerfile: Dockerfile
+      args:
+#        wes2mqtt_version: 0.0.1-dev-latest
+        GITHUB_USERNAME: ${GITHUB_USERNAME}
+        GITHUB_PASSWORD: ${GITHUB_PASSWORD}
     ports:
       - "8080:8080"
-    image: gs-spring-boot-docker-img:latest
-
-
+    image: wes2mqtt-img:latest
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
