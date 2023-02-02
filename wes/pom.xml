@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.rockhopper.smarthome</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.0.1-dev-latest</version>
+		<version>dev-latest-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>wes</artifactId>

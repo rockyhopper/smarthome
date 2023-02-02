@@ -4,7 +4,7 @@
 
 	<groupId>org.rockhopper.smarthome</groupId>
 	<artifactId>parent</artifactId>
-	<version>0.0.1-dev-latest</version>
+	<version>dev-latest-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>SmartHome POM</name>
 	<description>Parent for SmartHome Projects</description>

@@ -6,9 +6,9 @@ RUN wget -P /etc/apk/keys/ https://cdn.azul.com/public_keys/alpine-signing@azul.
 RUN echo "https://repos.azul.com/zulu/alpine" | tee -a /etc/apk/repositories
 # update the list of packages
 RUN apk update 
-RUN apk add zulu17-jdk maven
+RUN apk add zulu8-jdk maven
 
-ARG wes2mqtt_version=0.0.1-dev-latest
+ARG wes2mqtt_version=dev-latest-SNAPSHOT
 ARG GITHUB_USERNAME
 ARG GITHUB_PASSWORD
 

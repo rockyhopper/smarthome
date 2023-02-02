@@ -6,7 +6,7 @@ services:
       context: ./.
       dockerfile: Dockerfile
       args:
-#        wes2mqtt_version: 0.0.1-dev-latest
+#       wes2mqtt_version: dev-latest-SNAPSHOT
         GITHUB_USERNAME: ${GITHUB_USERNAME}
         GITHUB_PASSWORD: ${GITHUB_PASSWORD}
     ports:
