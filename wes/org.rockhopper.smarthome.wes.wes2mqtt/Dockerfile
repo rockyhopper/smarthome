@@ -1,15 +1,17 @@
 FROM ghcr.io/home-assistant/amd64-base:3.15
 
 RUN apk update 
-RUN apk add openjdk8 maven
+RUN apk add openjdk8
 
-ARG wes2mqtt_version=dev-latest-SNAPSHOT
+RUN echo "export WES2MQTT_VERSION='$(curl https://s01.oss.sonatype.org/content/repositories/snapshots/org/rockhopper/smarthome/wes2mqtt/dev-latest-SNAPSHOT/maven-metadata.xml \
+| grep '<value>.*</value>' \
+| tr -s " " \
+| cut -d ">" -f2 \
+| cut -d "<" -f1 \
+| sort -V -r \
+| head -1)'" >> /envfile
 
-COPY .m2 /root/.m2
-
-RUN mvn -s /root/.m2/settings.xml org.apache.maven.plugins:maven-dependency-plugin:3.5.0:copy -Dmdep.stripVersion=true -Dmdep.stripClassifier=true -Dartifact=org.rockhopper.smarthome:wes2mqtt:$wes2mqtt_version -DoutputDirectory=/
-
-RUN apk del maven && rm /var/cache/apk/*
+RUN . /envfile; curl -o /wes2mqtt.jar https://s01.oss.sonatype.org/content/repositories/snapshots/org/rockhopper/smarthome/wes2mqtt/dev-latest-SNAPSHOT/wes2mqtt-$WES2MQTT_VERSION.jar
 
 ENTRYPOINT ["java","-jar","/wes2mqtt.jar"]
 
