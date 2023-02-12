@@ -1,0 +1,31 @@
+gretings.suffix:  myAppInternalValue
+
+server:
+  port: 8081
+  shutdown: graceful
+
+management:
+#  server.port: 8082
+  endpoint.shutdown.enabled: true
+  endpoints.web.exposure.include: '*'
+
+mqtt:
+  username: admin							
+  password: public						
+  host-url: tcp://192.168.1.10:1883		# The address and port of your own server need to be changed 
+  clientID: Wes2MQTT					# This change is not optional, but different clients must not be the same
+  base-topic: wes2mqtt
+  stat-subtopic: stat
+  command-subtopic: cmnd
+  timeout: 100							   
+  keepalive: 100
+
+wes:
+#  ipAddress: 192.168.1.11
+#  macAddress: 001A2B3C4D5E
+  tcpPort: 1500 
+#  httpUser: admin
+#  httpPass: wes
+#  ftpUser: adminftp
+#  ftpPass: wesftp
+
