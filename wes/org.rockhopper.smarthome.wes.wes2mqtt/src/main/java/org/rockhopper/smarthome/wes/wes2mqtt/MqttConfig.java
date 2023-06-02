@@ -1,8 +1,6 @@
 package org.rockhopper.smarthome.wes.wes2mqtt;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -16,9 +14,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class MqttConfig {
-    @Autowired
-    private MqttPushClient mqttPushClient;
-
+	
     /**
      * User name
      */
@@ -35,7 +31,7 @@ public class MqttConfig {
     /**
      * Customer Id
      */
-    private String clientID;
+    private String clientId;
     /**
      * Base connection topic
      */
@@ -57,24 +53,6 @@ public class MqttConfig {
      */
     private int keepalive;
 
-    @Bean
-    public MqttPushClient getMqttPushClient() {
-    	System.out.println("hostUrl: "+ hostUrl);
-    	System.out.println("clientID: "+ clientID);
-    	System.out.println("username: "+ username);
-    	System.out.println("password: "+ password);
-    	System.out.println("timeout: "+timeout);
-    	System.out.println("keepalive: "+ keepalive);
-        mqttPushClient.connect(hostUrl, clientID, username, password, baseTopic + "/" + statSubTopic, timeout, keepalive);
-        mqttPushClient.subscribe(baseTopic + "/" + commandSubTopic + "/#", 0);
-        return mqttPushClient;
-    }
-
-    public void reconnectMqttPushClient(MqttPushClient mqttPushClient){
-        mqttPushClient.connect(hostUrl, clientID, username, password, baseTopic + "/" + statSubTopic, timeout, keepalive);
-        mqttPushClient.subscribe(baseTopic + "/" + commandSubTopic + "/#", 0);    	
-    }
-
 	public String getBaseTopic() {
 		return baseTopic;
 	}
@@ -87,8 +65,33 @@ public class MqttConfig {
 		return commandSubTopic;
 	}
 	
+	
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+	
 	public void setCommandSubTopic(String commandSubTopic) {
 		this.commandSubTopic= commandSubTopic;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public void setHostUrl(String hostUrl) {
+		this.hostUrl = hostUrl;
+	}
+
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
+
+	public void setKeepalive(int keepalive) {
+		this.keepalive = keepalive;
 	}
 
 	public String getStatSubTopic() {
@@ -97,6 +100,30 @@ public class MqttConfig {
 
 	public void setStatSubTopic(String statSubTopic) {
 		this.statSubTopic = statSubTopic;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public String getHostUrl() {
+		return hostUrl;
+	}
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public int getKeepalive() {
+		return keepalive;
 	} 
 	
 	

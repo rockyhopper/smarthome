@@ -3,6 +3,7 @@ package org.rockhopper.smarthome.wes.jwes.model.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.rockhopper.smarthome.wes.jwes.model.data.type.Field;
 import org.rockhopper.smarthome.wes.jwes.model.data.type.VirtualField;
 import org.rockhopper.smarthome.wes.jwes.model.helper.WesDataNavigatorHelper;
@@ -80,6 +81,10 @@ public class WesRelaysCard extends Field<String, Void> implements VirtualField {
 
     public Field<String, Void> getId() {
         return id;
+    }
+    
+    public String getPrettyId(){
+    	return ((id!=null)&&(id.getValue()!=null))?StringUtils.deleteWhitespace(id.getValue()):null;
     }
 
     public Field<String, Void> getStates() {

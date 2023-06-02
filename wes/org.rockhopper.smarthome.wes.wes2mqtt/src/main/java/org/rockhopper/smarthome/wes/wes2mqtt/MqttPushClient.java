@@ -1,5 +1,7 @@
 package org.rockhopper.smarthome.wes.wes2mqtt;
 
+import javax.annotation.PostConstruct;
+
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -11,6 +13,7 @@ import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,9 +27,12 @@ public class MqttPushClient {
     
     private static MqttClient client;
     
+    @Autowired
+    private MqttConfig mqttConfig;
+    
     private String statTopic;
 
-    private static MqttClient getClient() {
+    private MqttClient getClient() {
         return client;
     }
 
@@ -59,7 +65,7 @@ public class MqttPushClient {
             options.setPassword(password.toCharArray());
             options.setConnectionTimeout(timeout);
             options.setKeepAliveInterval(keepalive);
-            MqttPushClient.setClient(client);
+            setClient(client);
             try {
                 client.connect(options);
             } catch (Exception e) {
@@ -89,15 +95,7 @@ public class MqttPushClient {
    		client.setCallback(mqttCallback);
 	}
     
-    /**
-     * Release
-     *
-     * @param qos         Connection mode
-     * @param retained    Whether to retain
-     * @param subtopic    SubTopic
-     * @param pushMessage Message body
-     */
-    public void publish(int qos, boolean retained, String subtopic, String pushMessage) {
+    public void publishToTopic(int qos, boolean retained, String topic, String pushMessage) {
     	if (shutdownInProgress) {
     		return;
     	}
@@ -106,7 +104,7 @@ public class MqttPushClient {
         message.setQos(qos);
         message.setRetained(retained);
         message.setPayload(pushMessage.getBytes());
-        MqttTopic mTopic = MqttPushClient.getClient().getTopic(statTopic + "/" + subtopic);
+        MqttTopic mTopic = getClient().getTopic(topic);
         if (null == mTopic) {
             logger.error("topic not exist");
         }
@@ -120,6 +118,17 @@ public class MqttPushClient {
             e.printStackTrace();
         }
     }
+    /**
+     * Release
+     *
+     * @param qos         Connection mode
+     * @param retained    Whether to retain
+     * @param subtopic    SubTopic
+     * @param pushMessage Message body
+     */
+    public void publishToSubTopic(int qos, boolean retained, String subtopic, String pushMessage) {
+    	publishToTopic(qos, retained, statTopic + "/" + subtopic, pushMessage);
+    }
 
     /**
      * Subscribe to a topic
@@ -130,9 +139,31 @@ public class MqttPushClient {
     public void subscribe(String commandtopic, int qos) {
         logger.info("Start subscribing to topics {}", commandtopic);
         try {
-            MqttPushClient.getClient().subscribe(commandtopic, qos);
+            getClient().subscribe(commandtopic, qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
+    }
+    
+    public void reconnectMqttPushClient(){    
+    	System.out.println("hostUrl: "+ mqttConfig.getHostUrl());
+    	System.out.println("clientID: "+ mqttConfig.getClientId());
+    	System.out.println("username: "+ mqttConfig.getUsername());
+    	System.out.println("password: "+ mqttConfig.getPassword());
+    	System.out.println("timeout: " + mqttConfig.getTimeout());
+    	System.out.println("keepalive: "+ mqttConfig.getKeepalive());    	
+        connect(mqttConfig.getHostUrl(), 
+			    mqttConfig.getClientId(), 
+			    mqttConfig.getUsername(),
+			    mqttConfig.getPassword(), 
+			    mqttConfig.getBaseTopic() + "/" + mqttConfig.getStatSubTopic(), 
+			    mqttConfig.getTimeout(), 
+			    mqttConfig.getKeepalive());
+        subscribe(mqttConfig.getBaseTopic() + "/" + mqttConfig.getCommandSubTopic() + "/#", 0);    	
+    }
+    
+    @PostConstruct
+    public void init() {
+    	reconnectMqttPushClient();
     }
 }

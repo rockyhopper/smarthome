@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 @Component
 public class MqttWesClient implements WesEventListener, MqttCallback, DisposableBean {
@@ -34,6 +35,9 @@ public class MqttWesClient implements WesEventListener, MqttCallback, Disposable
 	
     @Autowired
     private MqttConfig mqttConfig;
+        
+    @Autowired
+	private FreeMarkerConfigurer freeMarkerConfigurer;
     
     @Autowired
     private MqttPushClient mqttPushClient;
@@ -43,15 +47,12 @@ public class MqttWesClient implements WesEventListener, MqttCallback, Disposable
 	private WesServer wesServer;	
 	
 	public MqttWesClient() {
-
 	}
 	
 	public void start() {
 		if (wesServer==null) {
 			throw new IllegalStateException("MqttWesClient cannot be started without WES Server!");
 		}
-		
-		mqttConfig.getMqttPushClient();
 		
 		log.info("{} {}", wesServer.getWesData(), (wesServer.getWesConfig()!=null)?wesServer.getWesConfig().getIpAddress():null);
 		
@@ -90,6 +91,9 @@ public class MqttWesClient implements WesEventListener, MqttCallback, Disposable
         }
         
         MapUtils.debugPrint(System.out, "myMap", cmndLabels);
+        
+        new HomeAssistantIntegration(mqttPushClient, freeMarkerConfigurer).fulfillDiscovery(wesServer);
+        
 
 		mqttPushClient.setCallback(this);	
 		wesServer.startPolling(this);	
@@ -118,7 +122,7 @@ public class MqttWesClient implements WesEventListener, MqttCallback, Disposable
 			){
 			if (mqttPushClient!=null) {
 				if (event.getNewValue()!=null) {
-					mqttPushClient.publish(0,false,labelToSubTopic(event.getFieldLabel()), event.getNewValue().toString());
+					mqttPushClient.publishToSubTopic(0,false,labelToSubTopic(event.getFieldLabel()), event.getNewValue().toString());
 				}
 				else {
 				    log.warn("Issue handling WesEvent, the new value for '{}' is null!", event.getFieldLabel());
@@ -165,7 +169,7 @@ public class MqttWesClient implements WesEventListener, MqttCallback, Disposable
 	        // After the connection is lost, it is usually reconnected here
 	        log.error("Disconnected ({}).", (cause!=null)?cause.getMessage():null, cause);
 	        try {
-	        	mqttConfig.reconnectMqttPushClient(mqttPushClient);
+	        	mqttPushClient.reconnectMqttPushClient();
 	        }
 	        catch (Exception e) {
 	        	log.error("Exception caught while trying to reconnect to MQTT Server", e);

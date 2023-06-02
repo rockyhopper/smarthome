@@ -17,8 +17,8 @@ public class PushCallback implements MqttCallback {
     private static final Logger logger = LoggerFactory.getLogger(MqttPushClient.class);
 
     @Autowired
-    private MqttConfig mqttConfig;
-
+    private MqttPushClient mqttPushClient;
+    
     private static MqttClient client;
 
     @Override
@@ -26,7 +26,7 @@ public class PushCallback implements MqttCallback {
         // After the connection is lost, it is usually reconnected here
         logger.info("Disconnected, can be reconnected");
         if (null != client) {
-            mqttConfig.getMqttPushClient();
+        	mqttPushClient.reconnectMqttPushClient();
         }
     }
 

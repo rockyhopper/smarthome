@@ -222,6 +222,10 @@ public class WesServer {
         this.macAddress = macAddress;
     }
 	
+    public String getMacAddress() {
+		return macAddress;
+	}
+    
     public <V, W> void forceUpdate(Field<V, W> field, V newValue) {
     	if (tcpPolling!=null) {
 			tcpPolling.forceUpdate(field, newValue);

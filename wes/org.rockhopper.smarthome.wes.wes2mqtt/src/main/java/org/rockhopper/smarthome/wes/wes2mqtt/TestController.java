@@ -35,19 +35,19 @@ public class TestController {
     @GetMapping(value = "/publishTopic")
     public String publishTopic() {
     	String topicString = "test";
-        mqttPushClient.publish(0, false, topicString, "Test posting");
+        mqttPushClient.publishToSubTopic(0, false, topicString, "Test posting");
         return "ok";
     }
  // Send custom message content (using default theme)
     @RequestMapping("/publishTopic/{data}")
     public void test1(@PathVariable("data") String data) {
     	String topicString = "test";
-    	mqttPushClient.publish(0,false,topicString, data);
+    	mqttPushClient.publishToSubTopic(0,false,topicString, data);
     }
  
     // Send custom message content and specify subject
     @RequestMapping("/publishTopic/{topic}/{data}")
     public void test2(@PathVariable("topic") String topic, @PathVariable("data") String data) {
-    	mqttPushClient.publish(0,false,topic, data);
+    	mqttPushClient.publishToSubTopic(0,false,topic, data);
     }
 }
