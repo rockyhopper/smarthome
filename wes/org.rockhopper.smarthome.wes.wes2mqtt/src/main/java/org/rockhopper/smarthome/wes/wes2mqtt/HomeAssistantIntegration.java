@@ -10,6 +10,7 @@ import org.rockhopper.smarthome.wes.jwes.model.WesServer;
 import org.rockhopper.smarthome.wes.jwes.model.data.WesOneWireRelay;
 import org.rockhopper.smarthome.wes.jwes.model.data.WesRelay;
 import org.rockhopper.smarthome.wes.jwes.model.data.WesRelaysCard;
+import org.rockhopper.smarthome.wes.jwes.model.data.WesSensor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import freemarker.template.Template;
@@ -36,6 +37,7 @@ public class HomeAssistantIntegration {
 	
 		registerWesRelaysSwitches(wesServer);
 		registerWesRelaysCardsRelaySwitches(wesServer);
+		registerWesSensors(wesServer);
 		
 		/*
         String cmndTopic= mqttConfig.getBaseTopic() + "/" + mqttConfig.getCommandSubTopic() + "/";       
@@ -102,6 +104,29 @@ public class HomeAssistantIntegration {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
+	}
+	
+	private void registerWesSensors(WesServer wesServer) {
+		try {
+			if (wesServer.getWesData().getSensors()!=null){
+				List<WesSensor> wesSensors= wesServer.getWesData().getSensors();
+				for (WesSensor wesSensor: wesSensors) {
+					if (wesSensor!=null) {
+						if ((wesSensor.getType()!=null)&&(wesSensor.getType().getValue()!=null)) {
+							Map<String,Object> values= new HashMap<String,Object>();
+							values.put("wesSensor", wesSensor);
+							values.put("wesSensorIdxPlusOne", wesSensor.getIndex()+1);
+							String payload= generateJsonByTemplate("sensor", values);			
+							mqttPushClient.publishToTopic(0, true, String.format("%s/sensor/wes_%s/wes_sensor%d/config", HOMEASSISTANT_DISCOVERY_TOPIC_PREFIX, wesServer.getMacAddress(), wesSensor.getIndex()+1), payload);
+						}					
+					}
+				}
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		
 	}
 	
 	private String generateJsonByTemplate(String templateName, Map<String, Object> input) throws Exception{

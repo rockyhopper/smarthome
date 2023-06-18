@@ -2,6 +2,7 @@ package org.rockhopper.smarthome.wes.jwes.model.data;
 
 import java.math.BigDecimal;
 
+import org.apache.commons.lang.StringUtils;
 import org.rockhopper.smarthome.wes.jwes.model.data.type.Field;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -35,6 +36,10 @@ public class WesSensor {
         return id;
     }
 
+    public String getPrettyId(){
+    	return ((id!=null)&&(id.getValue()!=null))?StringUtils.deleteWhitespace(id.getValue()):null;
+    }
+    
     public void setId(Field<String, Void> id) {
         this.id = id;
     }
