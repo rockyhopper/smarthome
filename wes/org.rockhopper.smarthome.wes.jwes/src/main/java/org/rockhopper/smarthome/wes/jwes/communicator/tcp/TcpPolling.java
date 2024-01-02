@@ -27,7 +27,7 @@ public class TcpPolling {
 	protected Logger log= LoggerFactory.getLogger(getClass());
 	
     private ScheduledExecutorService executor;
-    private PriorityBlockingQueue<FIFOEntry<FieldCommand<?, ?>>> fieldsToUpdate;
+    private PriorityBlockingQueue<FIFOEntry<?,?>> fieldsToUpdate;
 
     public static final int DELAY = 500;
 
@@ -65,7 +65,7 @@ public class TcpPolling {
     	}
 
         executor = Executors.newScheduledThreadPool(10);
-        fieldsToUpdate = new PriorityBlockingQueue<FIFOEntry<FieldCommand<?, ?>>>(50);
+        fieldsToUpdate = new PriorityBlockingQueue<FIFOEntry<?,?>>(50);
 
         tcpProtocol = new TcpProtocol(wesData);
 
@@ -100,7 +100,7 @@ public class TcpPolling {
         */
         
         while (!executor.isShutdown()) {
-            FIFOEntry<FieldCommand<?, ?>> fieldToUpdate = null;
+            FIFOEntry<?,?> fieldToUpdate = null;
             try {
                 fieldToUpdate = fieldsToUpdate.take();
             } 
@@ -141,13 +141,13 @@ public class TcpPolling {
         addFieldToUpdate(new FieldCommand<V, W>(field, null));
     }
 
-    private void addFieldToUpdate(FieldCommand<?, ?> field) {
+    private <V,W> void addFieldToUpdate(FieldCommand<V,W> field) {
         if (field != null) {
-            fieldsToUpdate.add(new FIFOEntry<FieldCommand<?, ?>>(field));
+            fieldsToUpdate.add(new FIFOEntry<V,W>(field));
         }
     }
 
-    private void update(FieldCommand<?, ?> fieldToUpdate) {
+    private <V,W> void update(FieldCommand<V,W> fieldToUpdate) {
     	if (fieldToUpdate.getPriority() != null) {
             String response = null;
             if (tcpProtocol != null) {
@@ -214,7 +214,7 @@ public class TcpPolling {
 	                executor.schedule(new Runnable() {
 	                    @Override
 	                    public void run() {
-	                        fieldsToUpdate.add(new FIFOEntry<FieldCommand<?, ?>>(fieldToUpdate));
+	                        fieldsToUpdate.add(new FIFOEntry<V,W>(fieldToUpdate));
 	                    }
 	                }, fieldToUpdate.getPriority() * DELAY, TimeUnit.MILLISECONDS);
             	}
