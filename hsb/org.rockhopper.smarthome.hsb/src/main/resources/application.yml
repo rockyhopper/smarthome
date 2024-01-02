@@ -1,0 +1,22 @@
+server:
+  port: 8081
+  shutdown: graceful
+
+management:
+#  server.port: 8082
+  endpoint.shutdown.enabled: true
+  endpoints.web.exposure.include: '*'
+
+mqtt:
+#  username: xxxxxxx
+#  password: xxxxxxx
+  host-url: tcp://192.168.0.1:1883		# The address and port of your own server need to be changed 
+  clientID: hsb2MQTT					# This change is not optional, but different clients must not be the same
+  hsb-base-topic: hsb2mqtt
+  sms-base-topic: sms2mqtt
+  stat-subtopic: stat
+  command-subtopic: cmnd
+  timeout: 100							   
+  keepalive: 100
+
+

@@ -7,10 +7,10 @@
 		<version>dev-latest-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>wes</artifactId>
+	<artifactId>hsb-parent</artifactId>
 	<packaging>pom</packaging>
-	<name>WES POM</name>
-	<description>Parent for WES Projects</description>
+	<name>HSB POM</name>
+	<description>Parent for HSB Projects</description>
 
 	<properties>
 		<java.version>17</java.version>
@@ -19,7 +19,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<spring-boot.version>2.7.18</spring-boot.version>
+		<spring-boot.version>3.2.0</spring-boot.version>
 	</properties>
 
 	<dependencyManagement>
@@ -45,8 +45,7 @@
 	</build>
 
 	<modules>
-		<module>org.rockhopper.smarthome.wes.jwes</module>
-		<module>org.rockhopper.smarthome.wes.jwes.simulator</module>		
-		<module>org.rockhopper.smarthome.wes.wes2mqtt</module>
+		<module>org.rockhopper.smarthome.hsb.ntgrrc</module>
+		<module>org.rockhopper.smarthome.hsb</module>
 	</modules>
 </project>

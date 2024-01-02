@@ -10,9 +10,9 @@ management:
   endpoints.web.exposure.include: '*'
 
 mqtt:
-  username: johann							
-  password: z35knGFha						
-  host-url: tcp://192.168.1.54:1883		# The address and port of your own server need to be changed 
+#  username: xxxxxxx							
+#  password: xxxxxxx						
+  host-url: tcp://192.168.0.1:1883		# The address and port of your own server need to be changed 
   clientID: Wes2MQTT					# This change is not optional, but different clients must not be the same
   base-topic: wes2mqtt
   stat-subtopic: stat
@@ -21,9 +21,9 @@ mqtt:
   keepalive: 100
 
 wes:
-  ipAddress: 192.168.1.11
-  macAddress: 001EC094A39A
-  tcpPort: 1500 
+  ipAddress: 192.168.0.2
+  macAddress: 0011AABBCCDD
+  tcpPort: 1900 
 #  httpUser: admin
 #  httpPass: wes
 #  ftpUser: adminftp

@@ -4,16 +4,16 @@
 
 	<parent>
 		<groupId>org.rockhopper.smarthome</groupId>
-		<artifactId>wes</artifactId>
+		<artifactId>hsb-parent</artifactId>
 		<version>dev-latest-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>jwes</artifactId>
+	<artifactId>jntgrrc</artifactId>
 	<packaging>jar</packaging>
-	<name>jwes</name>
-	<description>Java WES</description>
+	<name>jntgrrc</name>
+	<description>Java Netgear Remote Control</description>
 
-	<properties>		
+	<properties>
 		<skipTests>true</skipTests>
 	</properties>
 
@@ -22,16 +22,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-				</configuration>
+				<version>3.12.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.12.4</version>
+				<version>3.2.2</version>
 				<configuration>
 					<skipTests>${skipTests}</skipTests>
 				</configuration>
@@ -43,6 +39,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
+			<version>2.0.9</version>
 		</dependency>
 		<dependency>
     		<groupId>org.slf4j</groupId>
@@ -54,7 +51,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
+			<artifactId>logback-classic</artifactId>			
 		</dependency>		
 
 		<dependency>
@@ -66,14 +63,6 @@
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -96,16 +85,16 @@
 		    <version>3.1.4</version>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
+		    <groupId>org.junit.jupiter</groupId>
+		    <artifactId>junit-jupiter-api</artifactId>
+		    <scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.eclipse.jdt</groupId>
 			<artifactId>org.eclipse.jdt.annotation</artifactId>
-			<version>2.2.100</version>
+			<version>2.2.800</version>
 			<!--<scope>compile</scope> -->
 		</dependency>
+		
 	</dependencies>
 </project>

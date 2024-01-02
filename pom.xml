@@ -46,6 +46,7 @@
 
 	<modules>
 		<module>wes</module>
+		<module>hsb</module>
 	</modules>
 
 	<build>
