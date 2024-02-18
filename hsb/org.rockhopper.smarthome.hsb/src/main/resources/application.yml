@@ -19,4 +19,9 @@ mqtt:
   timeout: 100							   
   keepalive: 100
 
-
+ha:
+  protocol: http
+  host: supervisor
+  port: 80
+  bearer: ${SUPERVISOR_TOKEN}
+  
