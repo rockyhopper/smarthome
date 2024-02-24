@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-// {"datetime": "2024-02-12 14:59:35", "number": "+33616691198", "": "Whatsapp"}
+// {"datetime": "2024-02-12 14:59:35", "number": "+336...", "": "Whatsapp"}
 public class SMS implements Serializable{
 	private static final long serialVersionUID = -8576835180958704844L;
 	
