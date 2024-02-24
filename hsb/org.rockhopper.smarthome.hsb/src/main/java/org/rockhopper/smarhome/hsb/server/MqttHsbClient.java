@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -36,6 +37,9 @@ public class MqttHsbClient implements MqttCallback, DisposableBean {
     @Autowired
     private RestClient haRestClient;
 
+    @Value("${phone.responseNumber}")
+    private String responseNumber;
+    
 	public MqttHsbClient() {
 	}
 	
@@ -123,7 +127,9 @@ public class MqttHsbClient implements MqttCallback, DisposableBean {
 									   					.body("{\"message\": \"At %s from %s: %s\"}".formatted(DateTimeFormatter.ISO_LOCAL_TIME.format(sms.getDatetime()),sms.getNumber(),sms.getText()))
 									   					.retrieve()
 									   					.toBodilessEntity();
-					System.out.println(response.getStatusCode().value());
+					int responseCode= response.getStatusCode().value();
+					System.out.println(responseCode);
+					mqttPushClient.publishToTopic(0, false, "sms2mqtt/send", "{\"number\":\"%s\", \"text\":\"%s\"}".formatted(responseNumber,responseCode));
 					break;
 				case "signal":
 					log.info("{}>>{}",topic, message.getPayload());
