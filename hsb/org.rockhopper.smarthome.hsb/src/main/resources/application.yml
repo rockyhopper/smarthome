@@ -3,7 +3,7 @@ server:
   shutdown: graceful
 
 management:
-#  server.port: 8082
+#  server.port: 8182
   endpoint.shutdown.enabled: true
   endpoints.web.exposure.include: '*'
 
