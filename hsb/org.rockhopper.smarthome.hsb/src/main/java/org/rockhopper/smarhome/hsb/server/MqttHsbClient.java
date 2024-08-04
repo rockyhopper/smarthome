@@ -123,7 +123,7 @@ public class MqttHsbClient implements MqttCallback, DisposableBean {
 					
 					SMS sms= objectMapper.readValue(payload, SMS.class);
 					
-					ResponseEntity<Void>  response= haRestClient.post().uri("https://ha.rockhopper.org:8123/api/services/notify/mobile_app_rmx3472")
+					ResponseEntity<Void>  response= haRestClient.post().uri("https://ha.rockhopper.org/api/services/notify/mobile_app_rmx3472")
 									   					.body("{\"message\": \"At %s from %s: %s\"}".formatted(DateTimeFormatter.ISO_LOCAL_TIME.format(sms.getDatetime()),sms.getNumber(),sms.getText()))
 									   					.retrieve()
 									   					.toBodilessEntity();
