@@ -1,23 +1,23 @@
 package org.rockhopper.smarhome.hsb.server;
 
-import java.io.StringWriter;
-import java.util.Map;
+// import java.io.StringWriter;
+// import java.util.Map;
 
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import freemarker.template.Template;
+// import freemarker.template.Template;
 
 public class HomeAssistantIntegration {
 	
 	public static final String HOMEASSISTANT_DISCOVERY_TOPIC_PREFIX= "homeassistant";
 	
 	
-	private FreeMarkerConfigurer freeMarkerConfigurer; 
-	private MqttPushClient mqttPushClient; 
+//	private FreeMarkerConfigurer freeMarkerConfigurer; 
+//	private MqttPushClient mqttPushClient; 
 	
 	public HomeAssistantIntegration(MqttPushClient mqttPushClient, FreeMarkerConfigurer freeMarkerConfigurer) {
-		this.freeMarkerConfigurer= freeMarkerConfigurer;
-		this.mqttPushClient= mqttPushClient;
+//		this.freeMarkerConfigurer= freeMarkerConfigurer;
+//		this.mqttPushClient= mqttPushClient;
 	}
 	
 	public void fulfill() {
@@ -126,7 +126,7 @@ public class HomeAssistantIntegration {
 		
 	}
 	*/
-	
+	/*
 	private String generateJsonByTemplate(String templateName, Map<String, Object> input) throws Exception{
         String sourceCode = null;
         try{
@@ -142,7 +142,7 @@ public class HomeAssistantIntegration {
 
         return sourceCode;
     }
-	
+	*/
 	
 	
 }
