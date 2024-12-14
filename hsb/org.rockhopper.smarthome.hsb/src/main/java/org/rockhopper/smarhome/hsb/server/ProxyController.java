@@ -39,7 +39,7 @@ public class ProxyController {
 
 	@GetMapping("/")
 	public String index() {
-		return "Greetings from Spring Boot! " + suffixGreetingsMsg;
+		return "Greetings from HSB! " + suffixGreetingsMsg;
 	}
     
     @GetMapping(value = "/proxycmd/{key}")
