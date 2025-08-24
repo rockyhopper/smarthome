@@ -50,7 +50,7 @@ public class MqttApplication {
 				logger.warn("MAC Address is invalid! We are discarding the value ['{}']", wesConfig.getMacAddress());				
 			}
 			else {
-				logger.error("MAC Address is ['{}']", wesConfig.getMacAddress());
+				logger.info("MAC Address is ['{}']", wesConfig.getMacAddress());
 				wesServer= new WesServer(wesConfig.getMacAddress(), wesConfig);
 			}
 		}

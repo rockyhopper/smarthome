@@ -1,7 +1,7 @@
 FROM ghcr.io/home-assistant/amd64-base:3.15
 
 RUN apk update 
-RUN apk add openjdk8
+RUN apk add openjdk21
 
 RUN echo "export WES2MQTT_VERSION='$(curl https://s01.oss.sonatype.org/content/repositories/snapshots/org/rockhopper/smarthome/wes2mqtt/dev-latest-SNAPSHOT/maven-metadata.xml \
 | grep '<value>.*</value>' \
