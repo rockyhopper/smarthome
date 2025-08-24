@@ -26,7 +26,11 @@ public class PushCallback implements MqttCallback {
         // After the connection is lost, it is usually reconnected here
         logger.info("Disconnected, can be reconnected");
         if (null != client) {
-        	mqttPushClient.reconnectMqttPushClient();
+        	try {
+        	    mqttPushClient.reconnectMqttPushClient();
+        	} catch (Exception e) {
+        	    logger.error("Failed to reconnect MQTT client: {}", e.getMessage());
+        	}
         }
     }
 

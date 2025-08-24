@@ -27,6 +27,9 @@ public class MqttPushClient {
     
     private static MqttClient client;
     
+    // Store the callback to restore it after reconnection
+    private MqttCallback storedCallback;
+    
     @Autowired
     private MqttConfig mqttConfig;
     
@@ -51,29 +54,39 @@ public class MqttPushClient {
      * @param timeout   Timeout time
      * @param keepalive Retention number
      */
-    public void connect(String host, String clientID, String username, String password, String statTopic, int timeout, int keepalive) {
+    public void connect(String host, String clientID, String username, String password, String statTopic, int timeout, int keepalive) throws MqttException {
     	if (shutdownInProgress) {
-    		return;
+    		throw new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
     	}
     	this.statTopic= statTopic;
     	
-        try {
-            client = new MqttClient(host, clientID, new MemoryPersistence());
-            MqttConnectOptions options = new MqttConnectOptions();
-            options.setCleanSession(true);
-            options.setUserName(username);
-            options.setPassword(password.toCharArray());
-            options.setConnectionTimeout(timeout);
-            options.setKeepAliveInterval(keepalive);
-            setClient(client);
-            try {
-                client.connect(options);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        logger.info("Connecting to MQTT broker at {} with client ID {}", host, clientID);
+        
+        client = new MqttClient(host, clientID, new MemoryPersistence());
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setCleanSession(true);
+        options.setUserName(username);
+        options.setPassword(password.toCharArray());
+        options.setConnectionTimeout(timeout);
+        options.setKeepAliveInterval(keepalive);
+        
+        // Enable automatic reconnection
+        options.setAutomaticReconnect(false); // We handle reconnection manually for better control
+        
+        setClient(client);
+        
+        // Set callback if we have one stored
+        if (storedCallback != null) {
+        	client.setCallback(storedCallback);
         }
+        
+        client.connect(options);
+        
+        if (!client.isConnected()) {
+        	throw new MqttException(MqttException.REASON_CODE_BROKER_UNAVAILABLE);
+        }
+        
+        logger.info("Successfully connected to MQTT broker");
     }
 
     public void close(){
@@ -92,12 +105,19 @@ public class MqttPushClient {
     }
     
     public void setCallback(MqttCallback mqttCallback) {
-   		client.setCallback(mqttCallback);
+    	this.storedCallback = mqttCallback;
+    	if (client != null) {
+    		client.setCallback(mqttCallback);
+    	}
 	}
     
-    public void publishToTopic(int qos, boolean retained, String topic, String pushMessage) {
+    public void publishToTopic(int qos, boolean retained, String topic, String pushMessage) throws MqttException {
     	if (shutdownInProgress) {
-    		return;
+    		throw new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
+    	}
+    	
+    	if (client == null || !client.isConnected()) {
+    		throw new MqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
     	}
     	
         MqttMessage message = new MqttMessage();
@@ -107,16 +127,10 @@ public class MqttPushClient {
         MqttTopic mTopic = getClient().getTopic(topic);
         if (null == mTopic) {
             logger.error("topic not exist");
+            throw new MqttException(MqttException.REASON_CODE_INVALID_MESSAGE);
         }
-        MqttDeliveryToken token;
-        try {
-            token = mTopic.publish(message);
-            token.waitForCompletion();
-        } catch (MqttPersistenceException e) {
-            e.printStackTrace();
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+        MqttDeliveryToken token = mTopic.publish(message);
+        token.waitForCompletion();
     }
     /**
      * Release
@@ -126,7 +140,7 @@ public class MqttPushClient {
      * @param subtopic    SubTopic
      * @param pushMessage Message body
      */
-    public void publishToSubTopic(int qos, boolean retained, String subtopic, String pushMessage) {
+    public void publishToSubTopic(int qos, boolean retained, String subtopic, String pushMessage) throws MqttException {
     	publishToTopic(qos, retained, statTopic + "/" + subtopic, pushMessage);
     }
 
@@ -145,13 +159,30 @@ public class MqttPushClient {
         }
     }
     
-    public void reconnectMqttPushClient(){    
-    	System.out.println("hostUrl: "+ mqttConfig.getHostUrl());
-    	System.out.println("clientID: "+ mqttConfig.getClientId());
-    	System.out.println("username: "+ mqttConfig.getUsername());
-    	System.out.println("password: "+ mqttConfig.getPassword());
-    	System.out.println("timeout: " + mqttConfig.getTimeout());
-    	System.out.println("keepalive: "+ mqttConfig.getKeepalive());    	
+    public void reconnectMqttPushClient() throws MqttException {
+    	if (shutdownInProgress) {
+    		throw new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
+    	}
+    	
+    	logger.info("Attempting MQTT reconnection...");
+    	logger.debug("hostUrl: {}", mqttConfig.getHostUrl());
+    	logger.debug("clientID: {}", mqttConfig.getClientId());
+    	logger.debug("username: {}", mqttConfig.getUsername());
+    	logger.debug("timeout: {}", mqttConfig.getTimeout());
+    	logger.debug("keepalive: {}", mqttConfig.getKeepalive());
+    	
+    	// Cleanup existing connection if any
+    	if (client != null) {
+    		try {
+    			if (client.isConnected()) {
+    				client.disconnectForcibly();
+    			}
+    			client.close();
+    		} catch (Exception e) {
+    			logger.warn("Error cleaning up existing MQTT client: {}", e.getMessage());
+    		}
+    	}
+    	
         connect(mqttConfig.getHostUrl(), 
 			    mqttConfig.getClientId(), 
 			    mqttConfig.getUsername(),
@@ -159,11 +190,46 @@ public class MqttPushClient {
 			    mqttConfig.getBaseTopic() + "/" + mqttConfig.getStatSubTopic(), 
 			    mqttConfig.getTimeout(), 
 			    mqttConfig.getKeepalive());
-        subscribe(mqttConfig.getBaseTopic() + "/" + mqttConfig.getCommandSubTopic() + "/#", 0);    	
+        
+        // Restore the callback on the new client
+        if (storedCallback != null) {
+        	logger.debug("Restoring MQTT callback after reconnection");
+        	client.setCallback(storedCallback);
+        }
+			    
+        if (!isConnected()) {
+        	throw new MqttException(MqttException.REASON_CODE_BROKER_UNAVAILABLE);
+        }
+        
+        subscribe(mqttConfig.getBaseTopic() + "/" + mqttConfig.getCommandSubTopic() + "/#", 0);
+        logger.info("MQTT reconnection successful");
+    }
+    
+    /**
+     * Check if MQTT client is connected
+     */
+    public boolean isConnected() {
+    	return client != null && client.isConnected();
+    }
+    
+    /**
+     * Get connection status information
+     */
+    public String getConnectionStatus() {
+    	if (client == null) {
+    		return "Client not initialized";
+    	}
+    	return client.isConnected() ? "Connected" : "Disconnected";
     }
     
     @PostConstruct
     public void init() {
-    	reconnectMqttPushClient();
+    	try {
+    		reconnectMqttPushClient();
+    	} catch (MqttException e) {
+    		logger.error("Failed to initialize MQTT connection: {}", e.getMessage(), e);
+    		// Don't throw exception here to allow application to start
+    		// The reconnection mechanism will handle retries
+    	}
     }
 }

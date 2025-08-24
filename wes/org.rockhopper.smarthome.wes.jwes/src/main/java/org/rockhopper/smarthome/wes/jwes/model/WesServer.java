@@ -195,6 +195,10 @@ public class WesServer {
     	}
     }
     
+    public boolean isPolling() {
+        return tcpPolling != null && tcpPolling.isRunning();
+    }
+    
     public WesConfig getWesConfig() {
         return wesConfig;
     }

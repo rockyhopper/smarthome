@@ -123,6 +123,10 @@ public class TcpPolling {
     	}
     }
     
+    public boolean isRunning() {
+        return executor != null && !executor.isShutdown();
+    }
+    
     private void populateFieldsToUpdate(Map<Field<?, ?>, Byte> fieldsPrioritiesMap) {
         if (fieldsPrioritiesMap != null) {
             Iterator<Entry<Field<?, ?>, Byte>> entriesIt = fieldsPrioritiesMap.entrySet().iterator();

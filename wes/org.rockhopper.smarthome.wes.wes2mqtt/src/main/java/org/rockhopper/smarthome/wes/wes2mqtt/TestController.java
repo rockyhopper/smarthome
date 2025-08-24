@@ -35,19 +35,33 @@ public class TestController {
     @GetMapping(value = "/publishTopic")
     public String publishTopic() {
     	String topicString = "test";
-        mqttPushClient.publishToSubTopic(0, false, topicString, "Test posting");
-        return "ok";
+        try {
+            mqttPushClient.publishToSubTopic(0, false, topicString, "Test posting");
+            return "ok";
+        } catch (Exception e) {
+            return "error: " + e.getMessage();
+        }
     }
  // Send custom message content (using default theme)
     @RequestMapping("/publishTopic/{data}")
     public void test1(@PathVariable("data") String data) {
     	String topicString = "test";
-    	mqttPushClient.publishToSubTopic(0,false,topicString, data);
+    	try {
+    	    mqttPushClient.publishToSubTopic(0,false,topicString, data);
+    	} catch (Exception e) {
+    	    // Log error but don't expose to client
+    	    System.err.println("MQTT publish error: " + e.getMessage());
+    	}
     }
  
     // Send custom message content and specify subject
     @RequestMapping("/publishTopic/{topic}/{data}")
     public void test2(@PathVariable("topic") String topic, @PathVariable("data") String data) {
-    	mqttPushClient.publishToSubTopic(0,false,topic, data);
+    	try {
+    	    mqttPushClient.publishToSubTopic(0,false,topic, data);
+    	} catch (Exception e) {
+    	    // Log error but don't expose to client
+    	    System.err.println("MQTT publish error: " + e.getMessage());
+    	}
     }
 }
