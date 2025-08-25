@@ -122,6 +122,13 @@ jobs:
         # Configure GPG for Maven
         export GPG_TTY=$(tty)
         
+        echo "=== Maven Settings Check (SECURE) ==="
+        echo "Maven settings file exists: $(test -f ~/.m2/settings.xml && echo 'YES' || echo 'NO')"
+        if [ -f ~/.m2/settings.xml ]; then
+          echo "Settings file size: $(stat -c%s ~/.m2/settings.xml) bytes"
+          echo "Contains 'central' server: $(grep -q '<id>central</id>' ~/.m2/settings.xml && echo 'YES' || echo 'NO')"
+        fi
+        
         echo "=== Central Portal Deployment Debug ==="
         echo "Username length: $(echo -n "$CENTRAL_TOKEN_USERNAME" | wc -c)"
         echo "Password length: $(echo -n "$CENTRAL_TOKEN_PASSWORD" | wc -c)"
