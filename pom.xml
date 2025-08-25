@@ -4,7 +4,7 @@
 
 	<groupId>org.rockhopper.smarthome</groupId>
 	<artifactId>parent</artifactId>
-	<version>dev-latest-SNAPSHOT</version>
+	<version>0.9.0-beta</version>
 	<packaging>pom</packaging>
 	<name>SmartHome POM</name>
 	<description>Parent for SmartHome Projects</description>
@@ -106,6 +106,8 @@
 						<configuration>
 							<!-- Skip GPG signing in CI environments -->
 							<skip>${gpg.skip}</skip>
+							<executable>/usr/bin/gpg</executable>
+							<keyname>2B59FFA42A054A17</keyname>
 							<gpgArguments>
 								<arg>--pinentry-mode</arg>
 								<arg>loopback</arg>
