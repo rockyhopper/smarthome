@@ -123,6 +123,7 @@ jobs:
         export GPG_TTY=$(tty)
         
         mvn --batch-mode deploy \
+          -DskipTests \
           -Dgpg.passphrase="${GPG_PASSPHRASE}" \
           -Dgpg.keyname="${GPG_KEY}" \
           -Dgpg.executable=gpg \
