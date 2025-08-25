@@ -32,7 +32,7 @@ jobs:
         passphrase: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
         trust_level: 5
         
-    - name: List GPG keys and verify import
+    - name: Diagnose GPG key and attempt manual import
       env:
         GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
         GPG_KEYID: ${{ steps.import_gpg.outputs.keyid }}
@@ -44,36 +44,52 @@ jobs:
         echo "Email: $GPG_EMAIL"
         echo "Fingerprint: $GPG_FINGERPRINT"
         
-        echo "=== Detailed GPG keyring analysis ==="
+        echo "=== Analyzing GPG secret key format ==="
+        # Check if the secret key variable contains the expected headers
+        if echo "${{ secrets.OSSRH_GPG_SECRET_KEY }}" | head -1 | grep -q "BEGIN PGP PRIVATE KEY"; then
+          echo "✅ Secret key appears to have correct PGP header"
+        else
+          echo "❌ Secret key missing 'BEGIN PGP PRIVATE KEY' header"
+          echo "First line of secret key: $(echo '${{ secrets.OSSRH_GPG_SECRET_KEY }}' | head -1)"
+        fi
+        
+        echo "=== Current keyring status ==="
         echo "Public keys:"
         gpg --list-keys --keyid-format=LONG
         echo "Secret keys:"
         gpg --list-secret-keys --keyid-format=LONG
-        echo "Secret keys with colons format:"
-        gpg --list-secret-keys --with-colons
         
-        echo "=== Checking key trust and capabilities ==="
-        gpg --list-secret-keys --with-colons | grep -E '^(sec|ssb|uid)'
-        
-        echo "=== Verifying secret key exists ==="
-        if gpg --list-secret-keys | grep -q "$GPG_KEYID"; then
-          echo "Secret key $GPG_KEYID found in keyring"
-        else
-          echo "SECRET KEY NOT FOUND! This is the problem."
-          echo "Available secret keys:"
-          gpg --list-secret-keys --keyid-format=SHORT
-          exit 1
+        if ! gpg --list-secret-keys | grep -q "$GPG_KEYID"; then
+          echo "❌ SECRET KEY NOT IMPORTED - Attempting manual import"
+          
+          # Try manual import with more verbose output
+          echo "=== Attempting manual GPG import ==="
+          echo '${{ secrets.OSSRH_GPG_SECRET_KEY }}' | gpg --batch --import --verbose 2>&1
+          
+          echo "=== Checking keyring after manual import ==="
+          echo "Secret keys after manual import:"
+          gpg --list-secret-keys --keyid-format=LONG
+          
+          if gpg --list-secret-keys | grep -q "$GPG_KEYID"; then
+            echo "✅ Manual import successful!"
+          else
+            echo "❌ Manual import also failed"
+            echo "=== Diagnostic information ==="
+            echo "Secret key length: $(echo '${{ secrets.OSSRH_GPG_SECRET_KEY }}' | wc -c) characters"
+            echo "Secret key lines: $(echo '${{ secrets.OSSRH_GPG_SECRET_KEY }}' | wc -l) lines"
+            echo "This suggests the secret key format or content is incorrect"
+            exit 1
+          fi
         fi
         
-        echo "=== Testing different signing approaches ==="
-        
+        echo "=== Testing GPG signing ==="
         # Method 1: Try with key ID
         echo "Method 1: Testing with key ID $GPG_KEYID"
         if echo "test" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE" --pinentry-mode loopback --armor --detach-sign --default-key "$GPG_KEYID" 2>&1; then
           echo "SUCCESS: Key ID signing worked"
           echo "GPG_KEY=$GPG_KEYID" >> $GITHUB_ENV
         else
-          echo "FAILED: Key ID signing failed"
+          echo "FAILED: Key ID signing failed, trying email"
           
           # Method 2: Try with email
           echo "Method 2: Testing with email $GPG_EMAIL"
@@ -81,27 +97,8 @@ jobs:
             echo "SUCCESS: Email signing worked"
             echo "GPG_KEY=$GPG_EMAIL" >> $GITHUB_ENV
           else
-            echo "FAILED: Email signing failed"
-            
-            # Method 3: Try with fingerprint
-            echo "Method 3: Testing with fingerprint $GPG_FINGERPRINT"
-            if echo "test" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE" --pinentry-mode loopback --armor --detach-sign --default-key "$GPG_FINGERPRINT" 2>&1; then
-              echo "SUCCESS: Fingerprint signing worked"
-              echo "GPG_KEY=$GPG_FINGERPRINT" >> $GITHUB_ENV
-            else
-              echo "FAILED: Fingerprint signing failed"
-              
-              # Method 4: Try without --default-key (use first available key)
-              echo "Method 4: Testing without --default-key (first available secret key)"
-              if echo "test" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE" --pinentry-mode loopback --armor --detach-sign 2>&1; then
-                echo "SUCCESS: Default key signing worked"
-                echo "GPG_KEY=" >> $GITHUB_ENV  # Empty means use default
-              else
-                echo "FAILED: All signing methods failed"
-                echo "This indicates a problem with the private key import or format"
-                exit 1
-              fi
-            fi
+            echo "FAILED: Both key ID and email signing failed"
+            exit 1
           fi
         fi
 
