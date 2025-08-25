@@ -25,6 +25,7 @@ jobs:
         server-password: CENTRAL_TOKEN_PASSWORD
 
     - name: Import GPG key
+      id: import_gpg
       uses: crazy-max/ghaction-import-gpg@v6
       with:
         gpg_private_key: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
@@ -34,16 +35,43 @@ jobs:
     - name: List GPG keys and verify import
       env:
         GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
-        GPG_EMAIL: "smarthome@rockhopper.org"  # E-mail from the GPG key
+        GPG_KEYID: ${{ steps.import_gpg.outputs.keyid }}
+        GPG_EMAIL: ${{ steps.import_gpg.outputs.email }}
+        GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
       run: |
+        echo "=== GPG Import Results ==="
+        echo "Key ID: $GPG_KEYID"
+        echo "Email: $GPG_EMAIL"
+        echo "Fingerprint: $GPG_FINGERPRINT"
+        
         echo "=== Listing GPG keys ==="
         gpg --list-secret-keys --keyid-format=LONG
         
-        echo "=== Testing GPG signing with email: $GPG_EMAIL ==="
-        echo "test" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE" --pinentry-mode loopback --armor --detach-sign --default-key "$GPG_EMAIL"
+        # Test signing with the key ID from the import action
+        echo "=== Testing GPG signing with Key ID: $GPG_KEYID ==="
+        echo "test" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE" --pinentry-mode loopback --armor --detach-sign --default-key "$GPG_KEYID"
         
-        echo "=== GPG key setup complete ==="
-        echo "GPG_EMAIL=$GPG_EMAIL" >> $GITHUB_ENV
+        if [ $? -eq 0 ]; then
+          echo "=== GPG signing successful with Key ID ==="
+          echo "GPG_KEY=$GPG_KEYID" >> $GITHUB_ENV
+        else
+          echo "=== Key ID signing failed, trying with email ==="
+          echo "test" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE" --pinentry-mode loopback --armor --detach-sign --default-key "$GPG_EMAIL"
+          if [ $? -eq 0 ]; then
+            echo "=== GPG signing successful with email ==="
+            echo "GPG_KEY=$GPG_EMAIL" >> $GITHUB_ENV
+          else
+            echo "=== Both methods failed, trying with fingerprint ==="
+            echo "test" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE" --pinentry-mode loopback --armor --detach-sign --default-key "$GPG_FINGERPRINT"
+            if [ $? -eq 0 ]; then
+              echo "=== GPG signing successful with fingerprint ==="
+              echo "GPG_KEY=$GPG_FINGERPRINT" >> $GITHUB_ENV
+            else
+              echo "=== All methods failed ==="
+              exit 1
+            fi
+          fi
+        fi
 
     - name: Build with Maven
       run: mvn -B --update-snapshots package -DskipTests --file pom.xml
@@ -60,14 +88,14 @@ jobs:
         CENTRAL_TOKEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
         GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
       run: |
-        echo "Signing with GPG email: $GPG_EMAIL"
+        echo "Signing with GPG key: $GPG_KEY"
         
         # Configure GPG for Maven
         export GPG_TTY=$(tty)
         
         mvn --batch-mode deploy \
           -Dgpg.passphrase="${GPG_PASSPHRASE}" \
-          -Dgpg.keyname="${GPG_EMAIL}" \
+          -Dgpg.keyname="${GPG_KEY}" \
           -Dgpg.executable=gpg \
           -Dgpg.useagent=false
 
