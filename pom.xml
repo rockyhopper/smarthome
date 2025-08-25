@@ -9,6 +9,14 @@
 	<name>SmartHome POM</name>
 	<description>Parent for SmartHome Projects</description>
 
+	<properties>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- GPG signing can be skipped with -Dgpg.skip=true -->
+		<gpg.skip>false</gpg.skip>
+	</properties>
+
 	<url>https://github.com/rockyhopper/smarthome</url>
 
 	<licenses>
@@ -96,10 +104,14 @@
 							<goal>sign</goal>
 						</goals>
 						<configuration>
+							<!-- Skip GPG signing in CI environments -->
+							<skip>${gpg.skip}</skip>
 							<gpgArguments>
-							    <arg>--pinentry-mode</arg>
-							    <arg>loopback</arg>
-							</gpgArguments>							
+								<arg>--pinentry-mode</arg>
+								<arg>loopback</arg>
+								<arg>--batch</arg>
+								<arg>--no-tty</arg>
+							</gpgArguments>
 						</configuration>
 					</execution>
 				</executions>

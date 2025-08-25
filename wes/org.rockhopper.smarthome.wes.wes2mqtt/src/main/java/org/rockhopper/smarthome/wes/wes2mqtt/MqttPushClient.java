@@ -1,6 +1,6 @@
 package org.rockhopper.smarthome.wes.wes2mqtt;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;

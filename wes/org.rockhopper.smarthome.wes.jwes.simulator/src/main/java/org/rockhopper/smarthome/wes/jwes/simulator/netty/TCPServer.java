@@ -17,7 +17,7 @@ package org.rockhopper.smarthome.wes.jwes.simulator.netty;
 
 import java.net.InetSocketAddress;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

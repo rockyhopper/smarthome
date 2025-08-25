@@ -72,10 +72,10 @@
             <artifactId>spring-boot-starter-security</artifactId>
 		</dependency>        
 
-		<!-- JSTL for JSP -->
+		<!-- JSTL for JSP - Updated for Spring Boot 3.x -->
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
+			<groupId>org.glassfish.web</groupId>
+			<artifactId>jakarta.servlet.jsp.jstl</artifactId>
 		</dependency>
 
 		<!-- Need this to compile JSP -->
