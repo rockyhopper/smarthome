@@ -122,11 +122,19 @@ jobs:
         # Configure GPG for Maven
         export GPG_TTY=$(tty)
         
+        echo "=== Central Portal Deployment Debug ==="
+        echo "Username length: $(echo -n "$CENTRAL_TOKEN_USERNAME" | wc -c)"
+        echo "Password length: $(echo -n "$CENTRAL_TOKEN_PASSWORD" | wc -c)"
+        echo "First few chars of username: $(echo "$CENTRAL_TOKEN_USERNAME" | cut -c1-8)..."
+        
+        # Try deployment with more verbose output
+        echo "=== Starting Maven Deployment ==="
         mvn --batch-mode deploy \
           -DskipTests \
           -Dgpg.passphrase="${GPG_PASSPHRASE}" \
           -Dgpg.keyname="${GPG_KEY}" \
           -Dgpg.executable=gpg \
-          -Dgpg.useagent=false
+          -Dgpg.useagent=false \
+          -X
 
         
