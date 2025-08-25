@@ -29,13 +29,24 @@ jobs:
       with:
         gpg_private_key: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
         passphrase: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
+        trust_level: 5
         
-    - name: List GPG keys
+    - name: List and test GPG keys
+      env:
+        GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
       run: |
+        echo "=== Listing GPG keys ==="
         gpg --list-secret-keys --keyid-format=LONG
+        
+        echo "=== Getting key ID ==="
         GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=LONG | grep -E "sec\s+.*/" | head -1 | sed 's/.*\///g' | awk '{print $1}')
         echo "GPG_KEY_ID=$GPG_KEY_ID" >> $GITHUB_ENV
-        echo "GPG key imported successfully with ID: $GPG_KEY_ID"
+        echo "Found GPG key ID: $GPG_KEY_ID"
+        
+        echo "=== Testing GPG signing ==="
+        echo "test" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE" --pinentry-mode loopback --armor --detach-sign --default-key "$GPG_KEY_ID"
+        
+        echo "=== GPG key setup complete ==="
 
     - name: Build with Maven
       run: mvn -B --update-snapshots package -DskipTests --file pom.xml
@@ -53,8 +64,14 @@ jobs:
         GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
       run: |
         echo "Using GPG Key ID: $GPG_KEY_ID"
+        
+        # Configure GPG for Maven
+        export GPG_TTY=$(tty)
+        
         mvn --batch-mode deploy \
           -Dgpg.passphrase="${GPG_PASSPHRASE}" \
-          -Dgpg.keyname="${GPG_KEY_ID}"
+          -Dgpg.keyname="${GPG_KEY_ID}" \
+          -Dgpg.executable=gpg \
+          -Dgpg.useagent=false
 
         
