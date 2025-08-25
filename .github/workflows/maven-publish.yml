@@ -38,10 +38,38 @@ jobs:
         echo "=== Listing GPG keys ==="
         gpg --list-secret-keys --keyid-format=LONG
         
-        echo "=== Getting key ID ==="
-        GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=LONG | grep -E "sec\s+.*/" | head -1 | sed 's/.*\///g' | awk '{print $1}')
+        echo "=== Getting key ID (multiple methods) ==="
+        # Method 1: Extract from sec line
+        GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=LONG | grep -A1 "sec" | grep -v "sec" | head -1 | xargs)
+        echo "Method 1 - GPG Key ID: '$GPG_KEY_ID'"
+        
+        # Method 2: Extract from sec line directly
+        if [ -z "$GPG_KEY_ID" ]; then
+          GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=LONG | grep "sec" | sed 's/.*\/\([A-F0-9]*\).*/\1/')
+          echo "Method 2 - GPG Key ID: '$GPG_KEY_ID'"
+        fi
+        
+        # Method 3: Use fingerprint
+        if [ -z "$GPG_KEY_ID" ]; then
+          GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep "^sec" | cut -d: -f5)
+          echo "Method 3 - GPG Key ID: '$GPG_KEY_ID'"
+        fi
+        
+        # Method 4: Get the last 16 characters of fingerprint
+        if [ -z "$GPG_KEY_ID" ]; then
+          GPG_KEY_ID=$(gpg --list-secret-keys --with-fingerprint --keyid-format=LONG | grep "Key fingerprint" | sed 's/.*= //' | sed 's/ //g' | tail -c 17)
+          echo "Method 4 - GPG Key ID: '$GPG_KEY_ID'"
+        fi
+        
+        echo "Final GPG Key ID: '$GPG_KEY_ID'"
         echo "GPG_KEY_ID=$GPG_KEY_ID" >> $GITHUB_ENV
-        echo "Found GPG key ID: $GPG_KEY_ID"
+        
+        if [ -z "$GPG_KEY_ID" ]; then
+          echo "ERROR: Could not extract GPG key ID"
+          echo "Full GPG output:"
+          gpg --list-secret-keys --keyid-format=LONG --with-fingerprint
+          exit 1
+        fi
         
         echo "=== Testing GPG signing ==="
         echo "test" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE" --pinentry-mode loopback --armor --detach-sign --default-key "$GPG_KEY_ID"
@@ -68,10 +96,24 @@ jobs:
         # Configure GPG for Maven
         export GPG_TTY=$(tty)
         
-        mvn --batch-mode deploy \
-          -Dgpg.passphrase="${GPG_PASSPHRASE}" \
-          -Dgpg.keyname="${GPG_KEY_ID}" \
-          -Dgpg.executable=gpg \
-          -Dgpg.useagent=false
+        # Try with key ID first, fallback to email if key ID is empty
+        if [ -n "$GPG_KEY_ID" ] && [ "$GPG_KEY_ID" != "" ]; then
+          echo "Signing with Key ID: $GPG_KEY_ID"
+          mvn --batch-mode deploy \
+            -Dgpg.passphrase="${GPG_PASSPHRASE}" \
+            -Dgpg.keyname="${GPG_KEY_ID}" \
+            -Dgpg.executable=gpg \
+            -Dgpg.useagent=false
+        else
+          echo "Key ID not found, trying with email address"
+          # Extract email from GPG key
+          GPG_EMAIL=$(gpg --list-secret-keys | grep -E "uid.*<.*@.*>" | head -1 | sed 's/.*<\(.*@.*\)>.*/\1/')
+          echo "Using email: $GPG_EMAIL"
+          mvn --batch-mode deploy \
+            -Dgpg.passphrase="${GPG_PASSPHRASE}" \
+            -Dgpg.keyname="${GPG_EMAIL}" \
+            -Dgpg.executable=gpg \
+            -Dgpg.useagent=false
+        fi
 
         
