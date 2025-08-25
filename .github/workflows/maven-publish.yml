@@ -25,15 +25,16 @@ jobs:
         server-password: CENTRAL_TOKEN_PASSWORD
 
     - name: Import GPG key
-      env:
-        GPG_PRIVATE_KEY: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
-        GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
+      uses: crazy-max/ghaction-import-gpg@v6
+      with:
+        gpg_private_key: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
+        passphrase: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
+        
+    - name: List GPG keys
       run: |
-        echo "$GPG_PRIVATE_KEY" | gpg --batch --import
-        # Get the key ID from the imported key
-        GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=LONG | grep -E "sec\s+.*rsa.*/" | head -1 | sed 's/.*rsa[^/]*\///g' | sed 's/\s.*//g')
-        echo "GPG_KEY_ID=$GPG_KEY_ID" >> $GITHUB_ENV
         gpg --list-secret-keys --keyid-format=LONG
+        GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=LONG | grep -E "sec\s+.*/" | head -1 | sed 's/.*\///g' | awk '{print $1}')
+        echo "GPG_KEY_ID=$GPG_KEY_ID" >> $GITHUB_ENV
         echo "GPG key imported successfully with ID: $GPG_KEY_ID"
 
     - name: Build with Maven
@@ -51,7 +52,9 @@ jobs:
         CENTRAL_TOKEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
         GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
       run: |
+        echo "Using GPG Key ID: $GPG_KEY_ID"
         mvn --batch-mode deploy \
-          -Dgpg.passphrase="${GPG_PASSPHRASE}"
+          -Dgpg.passphrase="${GPG_PASSPHRASE}" \
+          -Dgpg.keyname="${GPG_KEY_ID}"
 
         
