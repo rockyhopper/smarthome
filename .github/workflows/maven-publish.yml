@@ -34,7 +34,7 @@ jobs:
     - name: List GPG keys and verify import
       env:
         GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
-        GPG_EMAIL: "smarthome@rockhopper.org"  # E-mail from the POM
+        GPG_EMAIL: "smarthome@rockhopper.org"  # E-mail from the GPG key
       run: |
         echo "=== Listing GPG keys ==="
         gpg --list-secret-keys --keyid-format=LONG
