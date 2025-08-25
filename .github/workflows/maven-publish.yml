@@ -31,50 +31,19 @@ jobs:
         passphrase: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
         trust_level: 5
         
-    - name: List and test GPG keys
+    - name: List GPG keys and verify import
       env:
         GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
+        GPG_EMAIL: "smarthome@rockhopper.org"  # E-mail from the POM
       run: |
         echo "=== Listing GPG keys ==="
         gpg --list-secret-keys --keyid-format=LONG
         
-        echo "=== Getting key ID (multiple methods) ==="
-        # Method 1: Extract from sec line
-        GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=LONG | grep -A1 "sec" | grep -v "sec" | head -1 | xargs)
-        echo "Method 1 - GPG Key ID: '$GPG_KEY_ID'"
-        
-        # Method 2: Extract from sec line directly
-        if [ -z "$GPG_KEY_ID" ]; then
-          GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=LONG | grep "sec" | sed 's/.*\/\([A-F0-9]*\).*/\1/')
-          echo "Method 2 - GPG Key ID: '$GPG_KEY_ID'"
-        fi
-        
-        # Method 3: Use fingerprint
-        if [ -z "$GPG_KEY_ID" ]; then
-          GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep "^sec" | cut -d: -f5)
-          echo "Method 3 - GPG Key ID: '$GPG_KEY_ID'"
-        fi
-        
-        # Method 4: Get the last 16 characters of fingerprint
-        if [ -z "$GPG_KEY_ID" ]; then
-          GPG_KEY_ID=$(gpg --list-secret-keys --with-fingerprint --keyid-format=LONG | grep "Key fingerprint" | sed 's/.*= //' | sed 's/ //g' | tail -c 17)
-          echo "Method 4 - GPG Key ID: '$GPG_KEY_ID'"
-        fi
-        
-        echo "Final GPG Key ID: '$GPG_KEY_ID'"
-        echo "GPG_KEY_ID=$GPG_KEY_ID" >> $GITHUB_ENV
-        
-        if [ -z "$GPG_KEY_ID" ]; then
-          echo "ERROR: Could not extract GPG key ID"
-          echo "Full GPG output:"
-          gpg --list-secret-keys --keyid-format=LONG --with-fingerprint
-          exit 1
-        fi
-        
-        echo "=== Testing GPG signing ==="
-        echo "test" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE" --pinentry-mode loopback --armor --detach-sign --default-key "$GPG_KEY_ID"
+        echo "=== Testing GPG signing with email: $GPG_EMAIL ==="
+        echo "test" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE" --pinentry-mode loopback --armor --detach-sign --default-key "$GPG_EMAIL"
         
         echo "=== GPG key setup complete ==="
+        echo "GPG_EMAIL=$GPG_EMAIL" >> $GITHUB_ENV
 
     - name: Build with Maven
       run: mvn -B --update-snapshots package -DskipTests --file pom.xml
@@ -91,29 +60,15 @@ jobs:
         CENTRAL_TOKEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
         GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
       run: |
-        echo "Using GPG Key ID: $GPG_KEY_ID"
+        echo "Signing with GPG email: $GPG_EMAIL"
         
         # Configure GPG for Maven
         export GPG_TTY=$(tty)
         
-        # Try with key ID first, fallback to email if key ID is empty
-        if [ -n "$GPG_KEY_ID" ] && [ "$GPG_KEY_ID" != "" ]; then
-          echo "Signing with Key ID: $GPG_KEY_ID"
-          mvn --batch-mode deploy \
-            -Dgpg.passphrase="${GPG_PASSPHRASE}" \
-            -Dgpg.keyname="${GPG_KEY_ID}" \
-            -Dgpg.executable=gpg \
-            -Dgpg.useagent=false
-        else
-          echo "Key ID not found, trying with email address"
-          # Extract email from GPG key
-          GPG_EMAIL=$(gpg --list-secret-keys | grep -E "uid.*<.*@.*>" | head -1 | sed 's/.*<\(.*@.*\)>.*/\1/')
-          echo "Using email: $GPG_EMAIL"
-          mvn --batch-mode deploy \
-            -Dgpg.passphrase="${GPG_PASSPHRASE}" \
-            -Dgpg.keyname="${GPG_EMAIL}" \
-            -Dgpg.executable=gpg \
-            -Dgpg.useagent=false
-        fi
+        mvn --batch-mode deploy \
+          -Dgpg.passphrase="${GPG_PASSPHRASE}" \
+          -Dgpg.keyname="${GPG_EMAIL}" \
+          -Dgpg.executable=gpg \
+          -Dgpg.useagent=false
 
         
