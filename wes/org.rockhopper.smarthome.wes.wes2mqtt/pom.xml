@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.rockhopper.smarthome</groupId>
 		<artifactId>wes</artifactId>
-		<version>0.9.0-beta</version>
+		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 
 	<artifactId>wes2mqtt</artifactId>
@@ -96,7 +96,7 @@
 		<dependency>
 			<groupId>org.rockhopper.smarthome</groupId>
 			<artifactId>jwes</artifactId>
-			<version>0.9.0-beta</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>

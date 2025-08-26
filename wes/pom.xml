@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.rockhopper.smarthome</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.9.0-beta</version>
+		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 
 	<artifactId>wes</artifactId>
@@ -36,6 +36,18 @@
 
 	<build>
 		<plugins>
+			<!-- Central Publishing Plugin for publishing WES modules -->
+			<plugin>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.8.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<publishingServerId>central</publishingServerId>
+					<autoPublish>true</autoPublish>
+					<waitUntil>published</waitUntil>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

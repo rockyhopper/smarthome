@@ -1,6 +1,21 @@
 name: Build and Deploy
 
-on: [push]
+on: 
+  push:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'Base version (e.g., 1.0.0)'
+        required: false
+        default: '0.9.1-beta'
+      sha1:
+        description: 'SHA1 suffix (e.g., -SNAPSHOT)'
+        required: false
+        default: ''
+      changelist:
+        description: 'Changelist suffix'
+        required: false
+        default: ''
 
 jobs:
   build:
@@ -116,8 +131,13 @@ jobs:
         CENTRAL_TOKEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
         CENTRAL_TOKEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
         GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
+        # CI-friendly versioning support
+        REVISION: ${{ github.event.inputs.revision || '0.9.1-beta' }}
+        SHA1: ${{ github.event.inputs.sha1 || '' }}
+        CHANGELIST: ${{ github.event.inputs.changelist || '' }}
       run: |
         echo "Signing with GPG key: $GPG_KEY"
+        echo "Using version: ${REVISION}${SHA1}${CHANGELIST}"
         
         # Configure GPG for Maven
         export GPG_TTY=$(tty)
@@ -134,10 +154,13 @@ jobs:
         echo "Password length: $(echo -n "$CENTRAL_TOKEN_PASSWORD" | wc -c)"
         echo "First few chars of username: $(echo "$CENTRAL_TOKEN_USERNAME" | cut -c1-8)..."
         
-        # Try deployment with more verbose output
+        # Try deployment with more verbose output and CI-friendly versioning
         echo "=== Starting Maven Deployment ==="
         mvn --batch-mode deploy \
           -DskipTests \
+          -Drevision="${REVISION}" \
+          -Dsha1="${SHA1}" \
+          -Dchangelist="${CHANGELIST}" \
           -Dgpg.passphrase="${GPG_PASSPHRASE}" \
           -Dgpg.keyname="${GPG_KEY}" \
           -Dgpg.executable=gpg \

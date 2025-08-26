@@ -4,12 +4,17 @@
 
 	<groupId>org.rockhopper.smarthome</groupId>
 	<artifactId>parent</artifactId>
-	<version>0.9.0-beta</version>
+	<version>${revision}${sha1}${changelist}</version>
 	<packaging>pom</packaging>
 	<name>SmartHome POM</name>
 	<description>Parent for SmartHome Projects</description>
 
 	<properties>
+		<!-- CI-friendly versioning -->
+		<revision>0.9.1-beta</revision>
+		<sha1/>
+		<changelist/>
+		
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -53,6 +58,39 @@
 
 	<build>
 		<plugins>
+			<!-- Flatten Maven Plugin for CI-friendly versioning -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>1.5.0</version>
+				<configuration>
+					<updatePomFile>true</updatePomFile>
+					<flattenMode>resolveCiFriendliesOnly</flattenMode>
+					<pomElements>
+						<parent>resolve</parent>
+						<name>resolve</name>
+						<description>resolve</description>
+						<developers>resolve</developers>
+						<contributors>resolve</contributors>
+					</pomElements>
+				</configuration>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- Replace Nexus Staging Plugin with Central Publishing Plugin -->
 			<plugin>
 				<groupId>org.sonatype.central</groupId>
