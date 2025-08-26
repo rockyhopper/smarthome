@@ -18,6 +18,8 @@ buildNumber.properties
 
 *.log
 
+.vscode
+
 # Testing files
 wes/org.rockhopper.smarthome.wes.jwes/OUT.XML
 wes/org.rockhopper.smarthome.wes.jwes/TEST.*
