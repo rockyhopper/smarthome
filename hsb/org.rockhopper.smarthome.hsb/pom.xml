@@ -1,16 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>org.rockhopper.smarthome</groupId>
-		<artifactId>wes</artifactId>
+		<artifactId>hsb-parent</artifactId>
 		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 
-	<artifactId>wes2mqtt</artifactId>
+	<artifactId>hsb</artifactId>
 	<packaging>jar</packaging>
-	<name>wes2mqtt</name>
-	<description>MQTT Gateway for WES</description>
+	<name>hsb</name>
+	<description>Home Service Bus for Home Assistant</description>
 
 	<build>
 		<plugins>
@@ -94,11 +95,6 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.rockhopper.smarthome</groupId>
-			<artifactId>jwes</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.6</version>
@@ -134,5 +130,13 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>log4j-over-slf4j</artifactId>
 		</dependency>
+		
+
+		<dependency>
+		    <groupId>org.apache.httpcomponents.client5</groupId>
+		    <artifactId>httpclient5</artifactId>
+		</dependency>
+		
 	</dependencies>
 </project>
+

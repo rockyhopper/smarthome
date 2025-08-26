@@ -7,10 +7,10 @@
 		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 
-	<artifactId>wes</artifactId>
+	<artifactId>hsb-parent</artifactId>
 	<packaging>pom</packaging>
-	<name>WES POM</name>
-	<description>Parent for WES Projects</description>
+	<name>HSB POM</name>
+	<description>Parent for HSB Projects</description>
 
 	<properties>
 		<java.version>21</java.version>
@@ -36,7 +36,7 @@
 
 	<build>
 		<plugins>
-			<!-- Central Publishing Plugin for publishing WES modules -->
+			<!-- Central Publishing Plugin for publishing HSB modules -->
 			<plugin>
 				<groupId>org.sonatype.central</groupId>
 				<artifactId>central-publishing-maven-plugin</artifactId>
@@ -49,19 +49,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.12.1</version>
-				<configuration>
-					<source>21</source>
-					<target>21</target>
-					<compilerArgs>
-						<arg>--add-modules</arg>
-						<arg>java.base</arg>
-					</compilerArgs>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
@@ -70,8 +57,7 @@
 	</build>
 
 	<modules>
-		<module>org.rockhopper.smarthome.wes.jwes</module>
-		<module>org.rockhopper.smarthome.wes.jwes.simulator</module>		
-		<module>org.rockhopper.smarthome.wes.wes2mqtt</module>
+		<module>org.rockhopper.smarthome.hsb.ntgrrc</module>
+		<module>org.rockhopper.smarthome.hsb</module>
 	</modules>
 </project>

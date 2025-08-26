@@ -25,3 +25,5 @@ wes/org.rockhopper.smarthome.wes.jwes/OUT.XML
 wes/org.rockhopper.smarthome.wes.jwes/TEST.*
 wes/org.rockhopper.smarthome.wes.wes2mqtt/application.properties
 
+.vscode
+.flattened-pom.xml
