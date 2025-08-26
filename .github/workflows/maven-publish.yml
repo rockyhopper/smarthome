@@ -141,7 +141,6 @@ jobs:
           -Dgpg.passphrase="${GPG_PASSPHRASE}" \
           -Dgpg.keyname="${GPG_KEY}" \
           -Dgpg.executable=gpg \
-          -Dgpg.useagent=false \
-          -X
+          -Dgpg.useagent=false
 
         
